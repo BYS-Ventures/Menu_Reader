@@ -1,1 +1,1 @@
-web: gunicorn -w 4 -b 0.0.0.0:8000 menu_reader_app:app
+web: gunicorn menu_reader_lite:app
