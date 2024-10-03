@@ -1,1 +1,1 @@
-web: gunicorn menu_reader_lite:app
+web: gunicorn menu_reader_app.menu_reader_lite:app
