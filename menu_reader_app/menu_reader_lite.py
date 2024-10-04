@@ -120,7 +120,7 @@ def my_function_internal(data):
 
         # Ensure the shape of the data is correct for each model
         if result_array.ndim == 1:
-            result_array = result_array.reshape(1, -1)
+            result_array = np.tile(result_array, (785, 1)).T  # Tile to create the expected number of features
         elif result_array.shape[1] != 785:
             raise ValueError(f"Feature shape mismatch, expected: 785, got {result_array.shape[1]}")
 
