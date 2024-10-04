@@ -1,5 +1,5 @@
 #app.py
-from flask import Flask, flash, request, redirect, url_for, render_template, session 
+from flask import Flask, flash, request, redirect, url_for, render_template, session
 import os
 # from werkzeug.utils import secure_filename
 # import cv2
@@ -16,11 +16,11 @@ app = Flask(__name__)
 # def get_memory_usage():
 #     process = psutil.Process(os.getpid())
 #     return process.memory_info().rss / (1024 ** 2)  # Return in MB
- 
+
 app.secret_key = "secret key"
 
-THUMBNAILS_FOLDER = 'static/thumbnails/'
-UPLOAD_FOLDER = 'static/uploads/'
+THUMBNAILS_FOLDER = 'menu_reader_app/static/thumbnails/'
+UPLOAD_FOLDER = 'menu_reader_app/static/uploads/'
 
 # Set base path to locate files in the correct directory
 base_path = os.path.dirname(__file__)
@@ -31,10 +31,15 @@ file_dimensions_path = os.path.join(base_path, 'file_dimensions.pkl')
 file_images = pickle.load(open(file_images_path, "rb"))
 file_dimensions = pickle.load(open(file_dimensions_path, "rb"))
 
+# Ensure required folders exist
+# Ensure required folders exist
+os.makedirs(os.path.join(base_path, THUMBNAILS_FOLDER), exist_ok=True)
+os.makedirs(os.path.join(base_path, UPLOAD_FOLDER), exist_ok=True)
+
 app.config['THUMBNAILS_FOLDER'] = THUMBNAILS_FOLDER
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
- 
+
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
 # Assuming these are the images available for clicking
@@ -58,11 +63,11 @@ def extract_filename(file_path):
     if len(parts) > 1:
         return parts[1]
     return file_path
- 
+
 @app.route('/')
 def home():
     return render_template('index.html', thumbnails=thumbnails)#, uploaded_images=uploaded_images)
- 
+
 # @app.route('/upload', methods=['POST'])
 # def upload_image():
 #     if 'file' not in request.files:
@@ -110,7 +115,7 @@ def new_function():
    
     # print("File path:", file_path)
     
-    try: 
+    try:
         # image0 = cv2.imread(file_path)
         # # Convert the image to RGB (OpenCV loads images in BGR format)
         # image = cv2.cvtColor(image0, cv2.COLOR_BGR2RGB)
@@ -162,6 +167,6 @@ def new_function():
         flash(f"Error: {e}")
         print('Error: ', e)
         return render_template('index.html', thumbnails = thumbnails, filename = filename)
- 
+
 if __name__ == "__main__":
     app.run(debug = False)
