@@ -119,8 +119,10 @@ def my_function_internal(data):
         result_array = np.array(data['result'], dtype=object)
 
         # Ensure the shape of the data is correct for each model
-        if result_array.ndim > 2:
-            result_array = result_array.reshape(result_array.shape[0], -1)
+        if result_array.ndim == 1:
+            result_array = result_array.reshape(1, -1)
+        elif result_array.shape[1] != 785:
+            raise ValueError(f"Feature shape mismatch, expected: 785, got {result_array.shape[1]}")
 
         # Placeholder logic for prediction (update as needed)
         xgb_pred = xgb.predict(result_array)
