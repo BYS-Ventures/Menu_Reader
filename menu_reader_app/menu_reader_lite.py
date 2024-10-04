@@ -23,7 +23,7 @@ file_images = pickle.load(open(file_images_path, "rb"))
 file_dimensions = pickle.load(open(file_dimensions_path, "rb"))
 
 # Load models once at startup
-model_path = os.path.join(base_path, 'menu_function', 'MyFunction')
+model_path = os.path.join(base_path, '..', 'menu_function', 'MyFunction')
 xgb = pickle.load(open(os.path.join(model_path, 'xgb.pkl'), 'rb'))
 xgb2_4 = pickle.load(open(os.path.join(model_path, 'xgb2_4.pkl'), 'rb'))
 xgb2_5 = pickle.load(open(os.path.join(model_path, 'xgb2_5.pkl'), 'rb'))
