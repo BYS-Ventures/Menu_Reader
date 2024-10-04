@@ -1,13 +1,8 @@
 #app.py
-from flask import Flask, flash, request, redirect, url_for, render_template, session
+from flask import Flask, flash, request, redirect, url_for, render_template, session, jsonify
 import os
-# from werkzeug.utils import secure_filename
-# import cv2
-# import numpy as np
-# import pandas as pd
 import requests
 import json
-# import base64
 import pickle
 import numpy as np
 
@@ -19,8 +14,8 @@ app = Flask(__name__)
 
 app.secret_key = "secret key"
 
-THUMBNAILS_FOLDER = 'menu_reader_app/static/thumbnails/'
-UPLOAD_FOLDER = 'menu_reader_app/static/uploads/'
+THUMBNAILS_FOLDER = 'static/thumbnails/'
+UPLOAD_FOLDER = 'static/uploads/'
 
 # Set base path to locate files in the correct directory
 base_path = os.path.dirname(__file__)
@@ -31,7 +26,6 @@ file_dimensions_path = os.path.join(base_path, 'file_dimensions.pkl')
 file_images = pickle.load(open(file_images_path, "rb"))
 file_dimensions = pickle.load(open(file_dimensions_path, "rb"))
 
-# Ensure required folders exist
 # Ensure required folders exist
 os.makedirs(os.path.join(base_path, THUMBNAILS_FOLDER), exist_ok=True)
 os.makedirs(os.path.join(base_path, UPLOAD_FOLDER), exist_ok=True)
@@ -59,10 +53,7 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def extract_filename(file_path):
-    parts = file_path.split('/', 1)
-    if len(parts) > 1:
-        return parts[1]
-    return file_path
+    return os.path.basename(file_path)  # Use only the filename without any path
 
 @app.route('/')
 def home():
@@ -107,23 +98,21 @@ def display_image(filename):
         session['selected_filename_path'] = THUMBNAILS_FOLDER + filename
         return render_template('index.html', filename='thumbnails/' + filename, thumbnails = thumbnails)
 
-
-@app.route('/display/menu_read', methods=['GET', 'POST'])
+@app.route('/display/menu_read', methods = ['GET','POST'])
 def new_function():
     file_path = session.get('selected_filename_path')
     filename = extract_filename(file_path)
 
     try:
-        file_name = extract_filename(filename)
-        result = file_images.get(file_name)
+        result = file_images.get(filename)
 
         # Check if dimensions are available
-        dimensions = file_dimensions.get(file_name)
+        dimensions = file_dimensions.get(filename)
         if dimensions is not None:
             height_img, width_img = dimensions
         else:
             # Handle missing dimensions
-            flash(f"Error: No dimensions found for {file_name}")
+            flash(f"Error: No dimensions found for {filename}")
             return render_template('index.html', thumbnails=thumbnails, filename=filename)
 
         data = {
@@ -134,7 +123,8 @@ def new_function():
 
         json_data = json.dumps(data, cls=NumpyEncoder)
 
-        function_app_url = "https://menu-reader.azurewebsites.net/api/MyFunction?code=4XMM6DmQmdPpC95hVvNjIQWggkOL5KKktzaagfCgT_IsAzFu1yvxUg=="
+        # Updated function URL to use Railway endpoint
+        function_app_url = "https://menureader-production.up.railway.app/api/MyFunction"
 
         headers = {'Content-Type': 'application/json'}
         response = requests.post(function_app_url, data=json_data, headers=headers)
@@ -153,6 +143,31 @@ def new_function():
         flash(f"Error: {e}")
         print('Error: ', e)
         return render_template('index.html', thumbnails=thumbnails, filename=filename)
+
+# New API endpoint to handle function requests
+@app.route('/api/MyFunction', methods=['POST'])
+def my_function():
+    try:
+        # Get the data from the request
+        data = request.get_json()
+
+        # Load models
+        model_path = os.path.join(base_path, 'menu_function', 'MyFunction')
+        xgb = pickle.load(open(os.path.join(model_path, 'xgb.pkl'), 'rb'))
+        xgb2_4 = pickle.load(open(os.path.join(model_path, 'xgb2_4.pkl'), 'rb'))
+        xgb2_5 = pickle.load(open(os.path.join(model_path, 'xgb2_5.pkl'), 'rb'))
+
+        # Placeholder logic for prediction (update as needed)
+        result = {
+            'xgb_prediction': xgb.predict(data['result']),
+            'xgb2_4_prediction': xgb2_4.predict(data['result']),
+            'xgb2_5_prediction': xgb2_5.predict(data['result']),
+        }
+
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug = False)
