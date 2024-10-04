@@ -108,40 +108,30 @@ def display_image(filename):
         return render_template('index.html', filename='thumbnails/' + filename, thumbnails = thumbnails)
 
 
-@app.route('/display/menu_read', methods = ['GET','POST'])
+@app.route('/display/menu_read', methods=['GET', 'POST'])
 def new_function():
     file_path = session.get('selected_filename_path')
     filename = extract_filename(file_path)
-   
-    # print("File path:", file_path)
-    
+
     try:
-        # image0 = cv2.imread(file_path)
-        # # Convert the image to RGB (OpenCV loads images in BGR format)
-        # image = cv2.cvtColor(image0, cv2.COLOR_BGR2RGB)
-
-        # # Convert the image array to a byte stream
-        # _, buffer = cv2.imencode('.png', image)
-
-        # # Convert the byte stream to a base64 string
-        # image_base64 = base64.b64encode(buffer).decode('utf-8')
-
-        # # Create a JSON payload
-        # data = {
-        #     "image": image_base64
-        # }
         file_name = extract_filename(filename)
-        # print('filename: ',file_name)
         result = file_images.get(file_name)
-        height_img, width_img = file_dimensions.get(file_name)
-        # print('height, width: ', height_img, width_img)
+
+        # Check if dimensions are available
+        dimensions = file_dimensions.get(file_name)
+        if dimensions is not None:
+            height_img, width_img = dimensions
+        else:
+            # Handle missing dimensions
+            flash(f"Error: No dimensions found for {file_name}")
+            return render_template('index.html', thumbnails=thumbnails, filename=filename)
 
         data = {
             "result": result,
             "height_img": height_img,
             "width_img": width_img
         }
-        
+
         json_data = json.dumps(data, cls=NumpyEncoder)
 
         function_app_url = "https://menu-reader.azurewebsites.net/api/MyFunction?code=4XMM6DmQmdPpC95hVvNjIQWggkOL5KKktzaagfCgT_IsAzFu1yvxUg=="
@@ -150,23 +140,19 @@ def new_function():
         response = requests.post(function_app_url, data=json_data, headers=headers)
 
         if response.status_code == 200:
-
             response_txt = response.text
             valid_json_string = response_txt.replace("'", "\"")
 
             categories = json.loads(valid_json_string)
-            # print(categories)
-            return render_template('index.html', categories=categories, thumbnails = thumbnails, filename = filename)
+            return render_template('index.html', categories=categories, thumbnails=thumbnails, filename=filename)
         else:
-            # print('cannot connect')
-            flash(f"Error: Cannot connect to function")
-            return render_template('index.html', thumbnails = thumbnails, filename = filename)
-                
-    
+            flash("Error: Cannot connect to function")
+            return render_template('index.html', thumbnails=thumbnails, filename=filename)
+
     except Exception as e:
         flash(f"Error: {e}")
         print('Error: ', e)
-        return render_template('index.html', thumbnails = thumbnails, filename = filename)
+        return render_template('index.html', thumbnails=thumbnails, filename=filename)
 
 if __name__ == "__main__":
     app.run(debug = False)
