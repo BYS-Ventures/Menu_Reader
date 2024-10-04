@@ -115,11 +115,23 @@ def new_function():
 # Internal function for prediction
 def my_function_internal(data):
     try:
+        # Convert the result to a numpy array
+        result_array = np.array(data['result'])
+
+        # Ensure the shape of the data is correct for each model
+        # You may need to adjust the shape or flatten it as per the model's requirements
+        if result_array.ndim > 2:
+            result_array = result_array.reshape(result_array.shape[0], -1)
+
         # Placeholder logic for prediction (update as needed)
+        xgb_pred = xgb.predict(result_array)
+        xgb2_4_pred = xgb2_4.predict(result_array)
+        xgb2_5_pred = xgb2_5.predict(result_array)
+
         result = {
-            'xgb_prediction': xgb.predict(data['result']),
-            'xgb2_4_prediction': xgb2_4.predict(data['result']),
-            'xgb2_5_prediction': xgb2_5.predict(data['result']),
+            'xgb_prediction': xgb_pred.tolist(),
+            'xgb2_4_prediction': xgb2_4_pred.tolist(),
+            'xgb2_5_prediction': xgb2_5_pred.tolist(),
         }
         return result
 
