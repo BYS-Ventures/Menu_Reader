@@ -123,7 +123,7 @@ def new_function():
 
         json_data = json.dumps(data, cls=NumpyEncoder)
 
-        # Updated function URL to use Railway endpoint
+        # Updated function URL to use Railway endpoint 
         function_app_url = "https://menureader-production.up.railway.app/api/MyFunction"
 
         headers = {'Content-Type': 'application/json'}
