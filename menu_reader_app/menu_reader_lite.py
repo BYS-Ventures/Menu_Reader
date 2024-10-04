@@ -37,7 +37,7 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
 # Assuming these are the images available for clicking
-available_images = os.listdir(UPLOAD_FOLDER)
+available_images = os.listdir(os.path.join(base_path, UPLOAD_FOLDER))
 
 #thumbnails = os.listdir(app.config['THUMBNAILS_FOLDER'])
 
