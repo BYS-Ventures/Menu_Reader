@@ -116,17 +116,17 @@ def new_function():
 def my_function_internal(data):
     try:
         # Convert the result to a numpy array
-        result_array = np.array(data['result'], dtype=object)
+        result_array = np.array(data['result'], dtype=float)
 
-        # Ensure the shape of the data is correct for each model
+        # Check if the array has the correct number of features
         if result_array.ndim == 1 and result_array.shape[0] == 785:
-            result_array = result_array.reshape(1, -1)  # Reshape to have the correct input shape
-        elif result_array.ndim == 2 and result_array.shape[1] != 785:
-            raise ValueError(f"Feature shape mismatch, expected: 785, got {result_array.shape[1]}")
-        elif result_array.ndim == 1 and result_array.shape[0] != 785:
-            raise ValueError(f"Feature shape mismatch, expected: 785, got {result_array.shape[0]}")
+            result_array = result_array.reshape(1, -1)
+        elif result_array.ndim == 2 and result_array.shape[1] == 785:
+            pass  # Shape is already correct
+        else:
+            raise ValueError(f"Feature shape mismatch, expected features of size 785, got {result_array.shape}")
 
-        # Placeholder logic for prediction (update as needed)
+        # Proceed with prediction
         xgb_pred = xgb.predict(result_array)
         xgb2_4_pred = xgb2_4.predict(result_array)
         xgb2_5_pred = xgb2_5.predict(result_array)
