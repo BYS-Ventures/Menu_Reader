@@ -22,8 +22,14 @@ app.secret_key = "secret key"
 THUMBNAILS_FOLDER = 'static/thumbnails/'
 UPLOAD_FOLDER = 'static/uploads/'
 
-file_images = pickle.load(open('file_images.pkl', "rb")) 
-file_dimensions = pickle.load(open('file_dimensions.pkl', "rb")) 
+# Set base path to locate files in the correct directory
+base_path = os.path.dirname(__file__)
+file_images_path = os.path.join(base_path, 'file_images.pkl')
+file_dimensions_path = os.path.join(base_path, 'file_dimensions.pkl')
+
+# Load the pickle files
+file_images = pickle.load(open(file_images_path, "rb"))
+file_dimensions = pickle.load(open(file_dimensions_path, "rb"))
 
 app.config['THUMBNAILS_FOLDER'] = THUMBNAILS_FOLDER
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -35,7 +41,6 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 available_images = os.listdir(UPLOAD_FOLDER)
 
 #thumbnails = os.listdir(app.config['THUMBNAILS_FOLDER'])
-
 
 thumbnails = ['parkers_menu.jpeg', 'aubrees_menu.jpeg' ,'meatheads_menu.jpeg', 'portillos_menu.jpeg','roanoke_menu.jpeg']
 
@@ -53,10 +58,9 @@ def extract_filename(file_path):
     if len(parts) > 1:
         return parts[1]
     return file_path
-     
+ 
 @app.route('/')
 def home():
-
     return render_template('index.html', thumbnails=thumbnails)#, uploaded_images=uploaded_images)
  
 # @app.route('/upload', methods=['POST'])
@@ -161,5 +165,3 @@ def new_function():
  
 if __name__ == "__main__":
     app.run(debug = False)
-
-
